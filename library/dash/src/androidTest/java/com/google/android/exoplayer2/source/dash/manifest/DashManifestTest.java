@@ -15,6 +15,8 @@
  */
 package com.google.android.exoplayer2.source.dash.manifest;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.net.Uri;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.dash.manifest.SegmentBase.SingleSegmentBase;
@@ -30,8 +32,6 @@ import junit.framework.TestCase;
 public class DashManifestTest extends TestCase {
 
   private static final UtcTimingElement DUMMY_UTC_TIMING = new UtcTimingElement("", "");
-  private static final List<SchemeValuePair> DUMMY_ACCESSIBILITY_DESCRIPTORS =
-      Collections.emptyList();
   private static final SingleSegmentBase DUMMY_SEGMENT_BASE = new SingleSegmentBase();
   private static final Format DUMMY_FORMAT = Format.createSampleFormat("", "", 0);
 
@@ -131,32 +131,35 @@ public class DashManifestTest extends TestCase {
   }
 
   private static void assertManifestEquals(DashManifest expected, DashManifest actual) {
-    assertEquals(expected.availabilityStartTime, actual.availabilityStartTime);
-    assertEquals(expected.duration, actual.duration);
-    assertEquals(expected.minBufferTime, actual.minBufferTime);
-    assertEquals(expected.dynamic, actual.dynamic);
-    assertEquals(expected.minUpdatePeriod, actual.minUpdatePeriod);
-    assertEquals(expected.timeShiftBufferDepth, actual.timeShiftBufferDepth);
-    assertEquals(expected.suggestedPresentationDelay, actual.suggestedPresentationDelay);
-    assertEquals(expected.utcTiming, actual.utcTiming);
-    assertEquals(expected.location, actual.location);
-    assertEquals(expected.getPeriodCount(), actual.getPeriodCount());
+    assertThat(actual.availabilityStartTimeMs).isEqualTo(expected.availabilityStartTimeMs);
+    assertThat(actual.durationMs).isEqualTo(expected.durationMs);
+    assertThat(actual.minBufferTimeMs).isEqualTo(expected.minBufferTimeMs);
+    assertThat(actual.dynamic).isEqualTo(expected.dynamic);
+    assertThat(actual.minUpdatePeriodMs).isEqualTo(expected.minUpdatePeriodMs);
+    assertThat(actual.timeShiftBufferDepthMs).isEqualTo(expected.timeShiftBufferDepthMs);
+    assertThat(actual.suggestedPresentationDelayMs)
+        .isEqualTo(expected.suggestedPresentationDelayMs);
+    assertThat(actual.publishTimeMs).isEqualTo(expected.publishTimeMs);
+    assertThat(actual.utcTiming).isEqualTo(expected.utcTiming);
+    assertThat(actual.location).isEqualTo(expected.location);
+    assertThat(actual.getPeriodCount()).isEqualTo(expected.getPeriodCount());
     for (int i = 0; i < expected.getPeriodCount(); i++) {
       Period expectedPeriod = expected.getPeriod(i);
       Period actualPeriod = actual.getPeriod(i);
-      assertEquals(expectedPeriod.id, actualPeriod.id);
-      assertEquals(expectedPeriod.startMs, actualPeriod.startMs);
+      assertThat(actualPeriod.id).isEqualTo(expectedPeriod.id);
+      assertThat(actualPeriod.startMs).isEqualTo(expectedPeriod.startMs);
       List<AdaptationSet> expectedAdaptationSets = expectedPeriod.adaptationSets;
       List<AdaptationSet> actualAdaptationSets = actualPeriod.adaptationSets;
-      assertEquals(expectedAdaptationSets.size(), actualAdaptationSets.size());
+      assertThat(actualAdaptationSets).hasSize(expectedAdaptationSets.size());
       for (int j = 0; j < expectedAdaptationSets.size(); j++) {
         AdaptationSet expectedAdaptationSet = expectedAdaptationSets.get(j);
         AdaptationSet actualAdaptationSet = actualAdaptationSets.get(j);
-        assertEquals(expectedAdaptationSet.id, actualAdaptationSet.id);
-        assertEquals(expectedAdaptationSet.type, actualAdaptationSet.type);
-        assertEquals(expectedAdaptationSet.accessibilityDescriptors,
-            actualAdaptationSet.accessibilityDescriptors);
-        assertEquals(expectedAdaptationSet.representations, actualAdaptationSet.representations);
+        assertThat(actualAdaptationSet.id).isEqualTo(expectedAdaptationSet.id);
+        assertThat(actualAdaptationSet.type).isEqualTo(expectedAdaptationSet.type);
+        assertThat(actualAdaptationSet.accessibilityDescriptors)
+            .isEqualTo(expectedAdaptationSet.accessibilityDescriptors);
+        assertThat(actualAdaptationSet.representations)
+            .isEqualTo(expectedAdaptationSet.representations);
       }
     }
   }
@@ -181,7 +184,7 @@ public class DashManifestTest extends TestCase {
   }
 
   private static DashManifest newDashManifest(int duration, Period... periods) {
-    return new DashManifest(0, duration, 1, false, 2, 3, 4, DUMMY_UTC_TIMING, Uri.EMPTY,
+    return new DashManifest(0, duration, 1, false, 2, 3, 4, 12345, DUMMY_UTC_TIMING, Uri.EMPTY,
         Arrays.asList(periods));
   }
 
@@ -190,8 +193,7 @@ public class DashManifestTest extends TestCase {
   }
 
   private static AdaptationSet newAdaptationSet(int seed, Representation... representations) {
-    return new AdaptationSet(++seed, ++seed, Arrays.asList(representations),
-        DUMMY_ACCESSIBILITY_DESCRIPTORS);
+    return new AdaptationSet(++seed, ++seed, Arrays.asList(representations), null, null);
   }
 
 }
